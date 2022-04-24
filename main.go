@@ -1,15 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/y-yagi/kaeru/internal/replacer"
 )
 
 const cmd = "kaeru"
@@ -60,6 +60,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	var wg sync.WaitGroup
+	r := replacer.New(replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: false, Stdout: stdout, Stderr: stderr})
 	filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
 		if path != "." && strings.HasPrefix(path, ".") {
 			if f.IsDir() {
@@ -67,43 +68,11 @@ func run(args []string, stdout, stderr io.Writer) int {
 			}
 		} else if !f.IsDir() {
 			wg.Add(1)
-			go replace(&wg, path, flags.Arg(0), flags.Arg(1))
+			go r.Run(&wg, path)
 		}
 		return nil
 	})
 
 	wg.Wait()
 	return 0
-}
-
-func replace(wg *sync.WaitGroup, path, from, to string) {
-	defer wg.Done()
-
-	f, err := os.Open(path)
-	if err != nil {
-		return
-	}
-
-	scanner := bufio.NewScanner(f)
-	needUpdate := false
-
-	for i := 1; scanner.Scan(); i++ {
-		t := scanner.Text()
-		if strings.Contains(t, from) {
-			fmt.Printf("Replace %s:%d: %s\n", path, i, t)
-			needUpdate = true
-		}
-	}
-
-	f.Close()
-	if !needUpdate {
-		return
-	}
-
-	// TODO: error check
-	data, _ := ioutil.ReadFile(path)
-	newData := strings.ReplaceAll(string(data), from, to)
-
-	info, _ := os.Stat(path)
-	ioutil.WriteFile(path, []byte(newData), info.Mode())
 }

@@ -15,8 +15,9 @@ import (
 const cmd = "kaeru"
 
 var (
-	flags       *flag.FlagSet
-	showVersion bool
+	flags         *flag.FlagSet
+	showVersion   bool
+	enableVerbose bool
 
 	version = "devel"
 )
@@ -29,6 +30,7 @@ func main() {
 func setFlags() {
 	flags = flag.NewFlagSet(cmd, flag.ExitOnError)
 	flags.BoolVar(&showVersion, "v", false, "print version number")
+	flags.BoolVar(&enableVerbose, "verbose", false, "enable versbose log")
 	flags.Usage = usage
 }
 
@@ -60,7 +62,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	var wg sync.WaitGroup
-	r := replacer.New(replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: false, Stdout: stdout, Stderr: stderr})
+	r := replacer.New(replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: enableVerbose, Stdout: stdout, Stderr: stderr})
 	filepath.Walk(".", func(path string, f os.FileInfo, err error) error {
 		if path != "." && strings.HasPrefix(path, ".") {
 			if f.IsDir() {

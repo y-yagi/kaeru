@@ -40,23 +40,23 @@ func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
 
 	scanner := bufio.NewScanner(f)
 	needUpdate := false
+	data := ""
 
 	for i := 1; scanner.Scan(); i++ {
 		t := scanner.Text()
 		if strings.Contains(t, r.from) {
-			fmt.Fprintf(r.stdout, "Replace %s:%d: %s\n", path, i, t)
+			if r.verbose {
+				fmt.Fprintf(r.stdout, "Replace %s:%d: %s\n", path, i, t)
+			}
 			needUpdate = true
 		}
+		data += t + "\n"
 	}
 
 	f.Close()
+
 	if !needUpdate {
 		return
-	}
-
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		fmt.Fprintf(r.stderr, "file read failed: %v\n", err)
 	}
 
 	newData := strings.ReplaceAll(string(data), r.from, r.to)

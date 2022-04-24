@@ -54,11 +54,20 @@ func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
 		return
 	}
 
-	// TODO: error check
 	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		fmt.Fprintf(r.stderr, "file read failed: %v\n", err)
+	}
 
 	newData := strings.ReplaceAll(string(data), r.from, r.to)
 
-	info, _ := os.Stat(path)
-	ioutil.WriteFile(path, []byte(newData), info.Mode())
+	info, err := os.Stat(path)
+	if err != nil {
+		fmt.Fprintf(r.stderr, "file stat failed: %v\n", err)
+	}
+
+	err = ioutil.WriteFile(path, []byte(newData), info.Mode())
+	if err != nil {
+		fmt.Fprintf(r.stderr, "file update failed: %v\n", err)
+	}
 }

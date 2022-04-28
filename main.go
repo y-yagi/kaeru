@@ -77,7 +77,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 	r := replacer.New(
 		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: enableVerbose, Stdout: stdout, Stderr: stderr, Regexp: regexp},
 	)
-	filepath.Walk(".", func(p string, f os.FileInfo, err error) error {
+
+	err := filepath.Walk(".", func(p string, f os.FileInfo, err error) error {
 		if p != "." && strings.HasPrefix(p, ".") {
 			if f.IsDir() {
 				return filepath.SkipDir
@@ -98,6 +99,10 @@ func run(args []string, stdout, stderr io.Writer) int {
 		go r.Run(&wg, p)
 		return nil
 	})
+
+	if err != nil {
+		return msg(err, stderr)
+	}
 
 	wg.Wait()
 	return 0

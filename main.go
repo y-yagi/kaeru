@@ -20,6 +20,7 @@ var (
 	showVersion     bool
 	enableVerbose   bool
 	filenamePattern string
+	regexp          bool
 
 	version = "devel"
 )
@@ -34,6 +35,7 @@ func setFlags() {
 	flags.BoolVar(&showVersion, "v", false, "print version number")
 	flags.BoolVar(&enableVerbose, "verbose", false, "enable versbose log")
 	flags.StringVar(&filenamePattern, "name", "", "file name pattern")
+	flags.BoolVar(&regexp, "regexp", false, "treat FROM as a regexp")
 	flags.Usage = usage
 }
 
@@ -72,7 +74,9 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	var wg sync.WaitGroup
-	r := replacer.New(replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: enableVerbose, Stdout: stdout, Stderr: stderr})
+	r := replacer.New(
+		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: enableVerbose, Stdout: stdout, Stderr: stderr, Regexp: regexp},
+	)
 	filepath.Walk(".", func(p string, f os.FileInfo, err error) error {
 		if p != "." && strings.HasPrefix(p, ".") {
 			if f.IsDir() {

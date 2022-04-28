@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"strings"
 	"sync"
 )
 
@@ -14,6 +13,7 @@ type Replacer struct {
 	from    string
 	to      string
 	verbose bool
+	regexp  bool
 	stdout  io.Writer
 	stderr  io.Writer
 }
@@ -22,12 +22,13 @@ type ReplacerOption struct {
 	From    string
 	To      string
 	Verbose bool
+	Regexp  bool
 	Stdout  io.Writer
 	Stderr  io.Writer
 }
 
 func New(p ReplacerOption) *Replacer {
-	return &Replacer{from: p.From, to: p.To, verbose: p.Verbose, stderr: p.Stderr, stdout: p.Stdout}
+	return &Replacer{from: p.From, to: p.To, verbose: p.Verbose, stderr: p.Stderr, stdout: p.Stdout, regexp: p.Regexp}
 }
 
 func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
@@ -42,9 +43,16 @@ func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
 	needUpdate := false
 	data := ""
 
+	var matcher Matcher
+	if r.regexp {
+		matcher = &RegexpMatcher{from: r.from, to: r.to}
+	} else {
+		matcher = &StringMatcher{from: r.from, to: r.to}
+	}
+
 	for i := 1; scanner.Scan(); i++ {
 		t := scanner.Text()
-		if strings.Contains(t, r.from) {
+		if matcher.match(t) {
 			if r.verbose {
 				fmt.Fprintf(r.stdout, "Replace %s:%d: %s\n", path, i, t)
 			}
@@ -59,7 +67,7 @@ func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
 		return
 	}
 
-	newData := strings.ReplaceAll(string(data), r.from, r.to)
+	newData := matcher.replace(string(data))
 
 	info, err := os.Stat(path)
 	if err != nil {

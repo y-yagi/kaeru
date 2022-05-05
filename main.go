@@ -6,10 +6,8 @@ import (
 	"io"
 	"os"
 	"path"
-	"path/filepath"
-	"strings"
-	"sync"
 
+	"github.com/y-yagi/kaeru/internal/finder"
 	"github.com/y-yagi/kaeru/internal/replacer"
 )
 
@@ -73,37 +71,14 @@ func run(args []string, stdout, stderr io.Writer) int {
 		}
 	}
 
-	var wg sync.WaitGroup
 	r := replacer.New(
 		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: enableVerbose, Stdout: stdout, Stderr: stderr, Regexp: regexp},
 	)
+	f := finder.New(finder.FinderOption{Replacer: r, Pattern: filenamePattern, Stdout: stdout, Stderr: stderr})
 
-	err := filepath.Walk(".", func(p string, f os.FileInfo, err error) error {
-		if p != "." && strings.HasPrefix(p, ".") {
-			if f.IsDir() {
-				return filepath.SkipDir
-			}
-		}
-
-		if f.IsDir() {
-			return nil
-		}
-
-		if len(filenamePattern) != 0 {
-			if matched, _ := path.Match(filenamePattern, path.Base(p)); !matched {
-				return nil
-			}
-		}
-
-		wg.Add(1)
-		go r.Run(&wg, p)
-		return nil
-	})
-
-	if err != nil {
+	if err := f.Run(); err != nil {
 		return msg(err, stderr)
 	}
 
-	wg.Wait()
 	return 0
 }

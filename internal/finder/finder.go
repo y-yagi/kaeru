@@ -11,6 +11,11 @@ import (
 	"github.com/y-yagi/kaeru/internal/replacer"
 )
 
+var ignoreDirectories = map[string]bool{
+	".git":         true,
+	"node_modules": true,
+}
+
 type Finder struct {
 	replacer *replacer.Replacer
 	pattern  string
@@ -33,7 +38,7 @@ func (f *Finder) Run() error {
 	var wg sync.WaitGroup
 
 	err := filepath.Walk(".", func(p string, fi os.FileInfo, err error) error {
-		if p != "." && strings.HasPrefix(p, ".") {
+		if f.isIgnorePath(p) {
 			if fi.IsDir() {
 				return filepath.SkipDir
 			}
@@ -57,4 +62,16 @@ func (f *Finder) Run() error {
 	wg.Wait()
 
 	return err
+}
+
+func (f *Finder) isIgnorePath(path string) bool {
+	if path != "." && strings.HasPrefix(path, ".") {
+		return true
+	}
+
+	if _, found := ignoreDirectories[path]; found {
+		return true
+	}
+
+	return false
 }

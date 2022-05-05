@@ -54,7 +54,7 @@ func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
 		t := scanner.Text()
 		if matcher.match(t) {
 			if r.verbose {
-				fmt.Fprintf(r.stdout, "Replace %s:%d: %s\n", path, i, t)
+				fmt.Fprintf(r.stdout, "Replace %s:%d: %s\n", path, i, matcher.colorizeFrom(t))
 			}
 			needUpdate = true
 		}

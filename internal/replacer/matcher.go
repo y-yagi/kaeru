@@ -3,11 +3,18 @@ package replacer
 import (
 	"regexp"
 	"strings"
+
+	"github.com/fatih/color"
+)
+
+var (
+	red = color.New(color.FgRed, color.Bold).SprintFunc()
 )
 
 type Matcher interface {
 	match(s string) bool
 	replace(s string) string
+	colorizeFrom(s string) string
 }
 
 type StringMatcher struct {
@@ -29,6 +36,10 @@ func (sm *StringMatcher) replace(s string) string {
 	return strings.ReplaceAll(s, sm.from, sm.to)
 }
 
+func (sm *StringMatcher) colorizeFrom(s string) string {
+	return strings.ReplaceAll(s, sm.from, red(sm.from))
+}
+
 func (rm *RegexpMatcher) match(s string) bool {
 	if rm.fromRe == nil {
 		rm.fromRe = regexp.MustCompile(rm.from)
@@ -41,4 +52,11 @@ func (rm *RegexpMatcher) replace(s string) string {
 		rm.fromRe = regexp.MustCompile(rm.from)
 	}
 	return string(rm.fromRe.ReplaceAll([]byte(s), []byte(rm.to)))
+}
+
+func (rm *RegexpMatcher) colorizeFrom(s string) string {
+	if rm.fromRe == nil {
+		rm.fromRe = regexp.MustCompile(rm.from)
+	}
+	return string(rm.fromRe.ReplaceAll([]byte(s), []byte(red(rm.from))))
 }

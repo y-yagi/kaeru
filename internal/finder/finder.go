@@ -13,6 +13,8 @@ import (
 
 var ignoreDirectories = map[string]bool{
 	".git":         true,
+	"log":          true,
+	"tmp":          true,
 	"node_modules": true,
 }
 

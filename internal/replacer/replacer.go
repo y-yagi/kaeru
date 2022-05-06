@@ -14,6 +14,7 @@ type Replacer struct {
 	to      string
 	verbose bool
 	regexp  bool
+	dryrun  bool
 	stdout  io.Writer
 	stderr  io.Writer
 }
@@ -23,12 +24,13 @@ type ReplacerOption struct {
 	To      string
 	Verbose bool
 	Regexp  bool
+	Dryrun  bool
 	Stdout  io.Writer
 	Stderr  io.Writer
 }
 
 func New(p ReplacerOption) *Replacer {
-	return &Replacer{from: p.From, to: p.To, verbose: p.Verbose, stderr: p.Stderr, stdout: p.Stdout, regexp: p.Regexp}
+	return &Replacer{from: p.From, to: p.To, verbose: p.Verbose, stderr: p.Stderr, stdout: p.Stdout, regexp: p.Regexp, dryrun: p.Dryrun}
 }
 
 func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
@@ -63,7 +65,7 @@ func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
 
 	f.Close()
 
-	if !needUpdate {
+	if r.dryrun || !needUpdate {
 		return
 	}
 

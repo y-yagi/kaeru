@@ -19,6 +19,7 @@ var (
 	enableVerbose   bool
 	filenamePattern string
 	regexp          bool
+	dryrun          bool
 
 	version = "devel"
 )
@@ -34,6 +35,7 @@ func setFlags() {
 	flags.BoolVar(&enableVerbose, "verbose", false, "enable versbose log")
 	flags.StringVar(&filenamePattern, "name", "", "file name pattern")
 	flags.BoolVar(&regexp, "regexp", false, "treat FROM as a regexp")
+	flags.BoolVar(&dryrun, "dry-run", false, "perform a trial run with no changes made")
 	flags.Usage = usage
 }
 
@@ -71,8 +73,13 @@ func run(args []string, stdout, stderr io.Writer) int {
 		}
 	}
 
+	if dryrun {
+		enableVerbose = true
+	}
+
 	r := replacer.New(
-		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: enableVerbose, Stdout: stdout, Stderr: stderr, Regexp: regexp},
+		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: enableVerbose,
+			Stdout: stdout, Stderr: stderr, Regexp: regexp, Dryrun: dryrun},
 	)
 	f := finder.New(finder.FinderOption{Replacer: r, Pattern: filenamePattern, Stdout: stdout, Stderr: stderr})
 

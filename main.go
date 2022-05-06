@@ -16,10 +16,10 @@ const cmd = "kaeru"
 var (
 	flags           *flag.FlagSet
 	showVersion     bool
-	enableVerbose   bool
 	filenamePattern string
 	regexp          bool
 	dryrun          bool
+	quiet           bool
 
 	version = "devel"
 )
@@ -32,10 +32,10 @@ func main() {
 func setFlags() {
 	flags = flag.NewFlagSet(cmd, flag.ExitOnError)
 	flags.BoolVar(&showVersion, "v", false, "print version number")
-	flags.BoolVar(&enableVerbose, "verbose", false, "enable versbose log")
 	flags.StringVar(&filenamePattern, "name", "", "file name pattern")
 	flags.BoolVar(&regexp, "regexp", false, "treat FROM as a regexp")
 	flags.BoolVar(&dryrun, "dry-run", false, "perform a trial run with no changes made")
+	flags.BoolVar(&quiet, "quiet", false, "supress output")
 	flags.Usage = usage
 }
 
@@ -73,12 +73,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		}
 	}
 
-	if dryrun {
-		enableVerbose = true
-	}
-
 	r := replacer.New(
-		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Verbose: enableVerbose,
+		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Quiet: quiet,
 			Stdout: stdout, Stderr: stderr, Regexp: regexp, Dryrun: dryrun},
 	)
 	f := finder.New(finder.FinderOption{Replacer: r, Pattern: filenamePattern, Stdout: stdout, Stderr: stderr})

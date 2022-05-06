@@ -10,13 +10,13 @@ import (
 )
 
 type Replacer struct {
-	from    string
-	to      string
-	verbose bool
-	regexp  bool
-	dryrun  bool
-	stdout  io.Writer
-	stderr  io.Writer
+	from   string
+	to     string
+	regexp bool
+	dryrun bool
+	quiet  bool
+	stdout io.Writer
+	stderr io.Writer
 }
 
 type ReplacerOption struct {
@@ -25,12 +25,13 @@ type ReplacerOption struct {
 	Verbose bool
 	Regexp  bool
 	Dryrun  bool
+	Quiet   bool
 	Stdout  io.Writer
 	Stderr  io.Writer
 }
 
 func New(p ReplacerOption) *Replacer {
-	return &Replacer{from: p.From, to: p.To, verbose: p.Verbose, stderr: p.Stderr, stdout: p.Stdout, regexp: p.Regexp, dryrun: p.Dryrun}
+	return &Replacer{from: p.From, to: p.To, quiet: p.Quiet, stderr: p.Stderr, stdout: p.Stdout, regexp: p.Regexp, dryrun: p.Dryrun}
 }
 
 func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
@@ -55,7 +56,7 @@ func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
 	for i := 1; scanner.Scan(); i++ {
 		t := scanner.Text()
 		if matcher.match(t) {
-			if r.verbose {
+			if !r.quiet {
 				fmt.Fprintf(r.stdout, "Replace %s:%d: %s\n", path, i, matcher.colorizeFrom(t))
 			}
 			needUpdate = true

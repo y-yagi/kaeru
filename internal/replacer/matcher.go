@@ -18,15 +18,13 @@ type Matcher interface {
 }
 
 type StringMatcher struct {
-	from   string
-	to     string
-	dryrun bool
+	from string
+	to   string
 }
 
 type RegexpMatcher struct {
 	from   string
 	to     string
-	dryrun bool
 	fromRe *regexp.Regexp
 }
 

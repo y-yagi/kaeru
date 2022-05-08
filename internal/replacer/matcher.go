@@ -58,5 +58,10 @@ func (rm *RegexpMatcher) colorizeFrom(s string) string {
 	if rm.fromRe == nil {
 		rm.fromRe = regexp.MustCompile(rm.from)
 	}
-	return string(rm.fromRe.ReplaceAllString(s, red(rm.from)))
+	willChangeStrings := rm.fromRe.FindAllString(s, -1)
+	res := ""
+	for _, str := range willChangeStrings {
+		res += strings.ReplaceAll(s, str, red(str))
+	}
+	return res
 }

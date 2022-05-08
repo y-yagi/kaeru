@@ -44,19 +44,19 @@ func (rm *RegexpMatcher) match(s string) bool {
 	if rm.fromRe == nil {
 		rm.fromRe = regexp.MustCompile(rm.from)
 	}
-	return rm.fromRe.Match([]byte(s))
+	return rm.fromRe.MatchString(s)
 }
 
 func (rm *RegexpMatcher) replace(s string) string {
 	if rm.fromRe == nil {
 		rm.fromRe = regexp.MustCompile(rm.from)
 	}
-	return string(rm.fromRe.ReplaceAll([]byte(s), []byte(rm.to)))
+	return string(rm.fromRe.ReplaceAllString(s, rm.to))
 }
 
 func (rm *RegexpMatcher) colorizeFrom(s string) string {
 	if rm.fromRe == nil {
 		rm.fromRe = regexp.MustCompile(rm.from)
 	}
-	return string(rm.fromRe.ReplaceAll([]byte(s), []byte(red(rm.from))))
+	return string(rm.fromRe.ReplaceAllString(s, red(rm.from)))
 }

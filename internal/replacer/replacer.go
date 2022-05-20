@@ -9,7 +9,11 @@ import (
 	"sync"
 )
 
-type Replacer struct {
+type Replacer interface {
+	Run(wg *sync.WaitGroup, path string)
+}
+
+type FileReplacer struct {
 	from   string
 	to     string
 	regexp bool
@@ -30,11 +34,11 @@ type ReplacerOption struct {
 	Stderr  io.Writer
 }
 
-func New(p ReplacerOption) *Replacer {
-	return &Replacer{from: p.From, to: p.To, quiet: p.Quiet, stderr: p.Stderr, stdout: p.Stdout, regexp: p.Regexp, dryrun: p.Dryrun}
+func New(p ReplacerOption) *FileReplacer {
+	return &FileReplacer{from: p.From, to: p.To, quiet: p.Quiet, stderr: p.Stderr, stdout: p.Stdout, regexp: p.Regexp, dryrun: p.Dryrun}
 }
 
-func (r *Replacer) Run(wg *sync.WaitGroup, path string) {
+func (r *FileReplacer) Run(wg *sync.WaitGroup, path string) {
 	defer wg.Done()
 
 	f, err := os.Open(path)

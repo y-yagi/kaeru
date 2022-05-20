@@ -19,14 +19,14 @@ var ignoreDirectories = map[string]bool{
 }
 
 type Finder struct {
-	replacer *replacer.Replacer
+	replacer replacer.Replacer
 	pattern  string
 	stderr   io.Writer
 	stdout   io.Writer
 }
 
 type FinderOption struct {
-	Replacer *replacer.Replacer
+	Replacer replacer.Replacer
 	Pattern  string
 	Stdout   io.Writer
 	Stderr   io.Writer

@@ -8,8 +8,13 @@ import (
 	"strings"
 	"sync"
 
+	ignore "github.com/sabhiram/go-gitignore"
+	"github.com/y-yagi/goext/osext"
 	"github.com/y-yagi/kaeru/internal/replacer"
 )
+
+// TODO(y-yagi): allow configuring
+const ignoreFile = ".gitignore"
 
 var ignoreDirectories = map[string]bool{
 	".git":         true,
@@ -19,10 +24,11 @@ var ignoreDirectories = map[string]bool{
 }
 
 type Finder struct {
-	replacer replacer.Replacer
-	pattern  string
-	stderr   io.Writer
-	stdout   io.Writer
+	replacer  replacer.Replacer
+	pattern   string
+	stderr    io.Writer
+	stdout    io.Writer
+	gitignore *ignore.GitIgnore
 }
 
 type FinderOption struct {
@@ -38,12 +44,21 @@ func New(f FinderOption) *Finder {
 
 func (f *Finder) Run() error {
 	var wg sync.WaitGroup
+	var err error
 
-	err := filepath.Walk(".", func(p string, fi os.FileInfo, err error) error {
+	if osext.IsExist(ignoreFile) {
+		f.gitignore, err = ignore.CompileIgnoreFile(ignoreFile)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = filepath.Walk(".", func(p string, fi os.FileInfo, err error) error {
 		if f.isIgnorePath(p) {
 			if fi.IsDir() {
 				return filepath.SkipDir
 			}
+			return nil
 		}
 
 		if fi.IsDir() {
@@ -72,6 +87,10 @@ func (f *Finder) isIgnorePath(path string) bool {
 	}
 
 	if _, found := ignoreDirectories[path]; found {
+		return true
+	}
+
+	if f.gitignore != nil && f.gitignore.MatchesPath(path) {
 		return true
 	}
 

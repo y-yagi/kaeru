@@ -35,14 +35,19 @@ func TestFinder_string(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ignoreDirs := []string{".git", "log"}
+	ignorefile := tempdir + "/.gitignore"
+	if err = ioutil.WriteFile(ignorefile, []byte("public/"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	ignoreDirs := []string{".git", "log", "public"}
 	for _, ignoredir := range ignoreDirs {
 		dir := tempdir + "/" + ignoredir
 		if err = os.Mkdir(dir, 0755); err != nil {
 			t.Fatal(err)
 		}
 		testfile := dir + "/dummy.log"
-		if err = ioutil.WriteFile(testfile, []byte("Hello, world"), 0644); err != nil {
+		if err = ioutil.WriteFile(testfile, []byte("Hello, world\n"), 0644); err != nil {
 			t.Fatal(err)
 		}
 	}

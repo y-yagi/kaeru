@@ -1,7 +1,6 @@
 package replacer_test
 
 import (
-	"io/ioutil"
 	"os"
 	"sync"
 	"testing"
@@ -10,14 +9,14 @@ import (
 )
 
 func TestReplacer_string(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "replacertest")
+	tempDir, err := os.MkdirTemp("", "replacertest")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tempDir)
 
 	testfile := tempDir + "/dummy.log"
-	if err = ioutil.WriteFile(testfile, []byte("Hello, wolrd"), 0644); err != nil {
+	if err = os.WriteFile(testfile, []byte("Hello, wolrd"), 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -26,7 +25,7 @@ func TestReplacer_string(t *testing.T) {
 	replacer := replacer.New(replacer.ReplacerOption{From: "wolrd", To: "world", Stdout: os.Stdout, Stderr: os.Stderr, Quiet: true})
 	replacer.Run(&wg, testfile)
 
-	newtext, err := ioutil.ReadFile(testfile)
+	newtext, err := os.ReadFile(testfile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,14 +37,14 @@ func TestReplacer_string(t *testing.T) {
 }
 
 func TestReplacer_regexp(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "replacertest")
+	tempDir, err := os.MkdirTemp("", "replacertest")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tempDir)
 
 	testfile := tempDir + "/dummy.log"
-	if err = ioutil.WriteFile(testfile, []byte("Hello, world from 2022/01/31"), 0644); err != nil {
+	if err = os.WriteFile(testfile, []byte("Hello, world from 2022/01/31"), 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -54,7 +53,7 @@ func TestReplacer_regexp(t *testing.T) {
 	replacer := replacer.New(replacer.ReplacerOption{From: "(\\d{4})/(\\d{2})/(\\d{2})", To: "$2/$3/$1", Stdout: os.Stdout, Stderr: os.Stderr, Quiet: true, Regexp: true})
 	replacer.Run(&wg, testfile)
 
-	newtext, err := ioutil.ReadFile(testfile)
+	newtext, err := os.ReadFile(testfile)
 	if err != nil {
 		t.Fatal(err)
 	}

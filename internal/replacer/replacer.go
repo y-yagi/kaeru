@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"sync"
 )
@@ -81,7 +80,7 @@ func (r *FileReplacer) Run(wg *sync.WaitGroup, path string) {
 		fmt.Fprintf(r.stderr, "file stat failed: %v\n", err)
 	}
 
-	err = ioutil.WriteFile(path, []byte(newData), info.Mode())
+	err = os.WriteFile(path, []byte(newData), info.Mode())
 	if err != nil {
 		fmt.Fprintf(r.stderr, "file update failed: %v\n", err)
 	}

@@ -1,7 +1,6 @@
 package finder_test
 
 import (
-	"io/ioutil"
 	"os"
 	"sync"
 	"testing"
@@ -19,7 +18,7 @@ func (r *TestReplacer) Run(wg *sync.WaitGroup, path string) {
 }
 
 func TestFinder_string(t *testing.T) {
-	tempdir, err := ioutil.TempDir("", "findertest")
+	tempdir, err := os.MkdirTemp("", "findertest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,12 +30,12 @@ func TestFinder_string(t *testing.T) {
 	}
 
 	testfile := testdir + "/dummy.log"
-	if err = ioutil.WriteFile(testfile, []byte("Hello, world"), 0644); err != nil {
+	if err = os.WriteFile(testfile, []byte("Hello, world"), 0644); err != nil {
 		t.Fatal(err)
 	}
 
 	ignorefile := tempdir + "/.gitignore"
-	if err = ioutil.WriteFile(ignorefile, []byte("public/"), 0644); err != nil {
+	if err = os.WriteFile(ignorefile, []byte("public/"), 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -47,7 +46,7 @@ func TestFinder_string(t *testing.T) {
 			t.Fatal(err)
 		}
 		testfile := dir + "/dummy.log"
-		if err = ioutil.WriteFile(testfile, []byte("Hello, world\n"), 0644); err != nil {
+		if err = os.WriteFile(testfile, []byte("Hello, world\n"), 0644); err != nil {
 			t.Fatal(err)
 		}
 	}

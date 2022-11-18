@@ -1,6 +1,7 @@
 package finder
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -24,27 +25,41 @@ var ignoreDirectories = map[string]bool{
 }
 
 type Finder struct {
-	replacer  replacer.Replacer
-	pattern   string
-	stderr    io.Writer
-	stdout    io.Writer
-	gitignore *ignore.GitIgnore
+	replacer           replacer.Replacer
+	pattern            string
+	stderr             io.Writer
+	stdout             io.Writer
+	gitignore          *ignore.GitIgnore
+	appendedIgnore     *ignore.GitIgnore
+	appendedIgnoreFile string
 }
 
 type FinderOption struct {
-	Replacer replacer.Replacer
-	Pattern  string
-	Stdout   io.Writer
-	Stderr   io.Writer
+	Replacer           replacer.Replacer
+	Pattern            string
+	AppendedIgnoreFile string
+	Stdout             io.Writer
+	Stderr             io.Writer
 }
 
 func New(f FinderOption) *Finder {
-	return &Finder{replacer: f.Replacer, pattern: f.Pattern, stderr: f.Stderr, stdout: f.Stdout}
+	return &Finder{replacer: f.Replacer, pattern: f.Pattern, stderr: f.Stderr, stdout: f.Stdout, appendedIgnoreFile: f.AppendedIgnoreFile}
 }
 
 func (f *Finder) Run() error {
 	var wg sync.WaitGroup
 	var err error
+
+	if len(f.appendedIgnoreFile) != 0 {
+		if !osext.IsExist(f.appendedIgnoreFile) {
+			return fmt.Errorf("ignore file did'nt find: '%s'", f.appendedIgnoreFile)
+		}
+
+		f.appendedIgnore, err = ignore.CompileIgnoreFile(f.appendedIgnoreFile)
+		if err != nil {
+			return err
+		}
+	}
 
 	if osext.IsExist(ignoreFile) {
 		f.gitignore, err = ignore.CompileIgnoreFile(ignoreFile)
@@ -91,6 +106,10 @@ func (f *Finder) isIgnorePath(path string) bool {
 	}
 
 	if f.gitignore != nil && f.gitignore.MatchesPath(path) {
+		return true
+	}
+
+	if f.appendedIgnore != nil && f.appendedIgnore.MatchesPath(path) {
 		return true
 	}
 

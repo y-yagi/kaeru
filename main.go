@@ -14,12 +14,13 @@ import (
 const cmd = "kaeru"
 
 var (
-	flags           *flag.FlagSet
-	showVersion     bool
-	filenamePattern string
-	regexp          bool
-	dryrun          bool
-	quiet           bool
+	flags              *flag.FlagSet
+	showVersion        bool
+	filenamePattern    string
+	appendedIgnoreFile string
+	regexp             bool
+	dryrun             bool
+	quiet              bool
 
 	version = "devel"
 )
@@ -36,6 +37,7 @@ func setFlags() {
 	flags.BoolVar(&regexp, "regexp", false, "treat FROM as a regexp")
 	flags.BoolVar(&dryrun, "dry-run", false, "perform a trial run with no changes made")
 	flags.BoolVar(&quiet, "quiet", false, "supress output")
+	flags.StringVar(&appendedIgnoreFile, "ignore-file", "", "pass a file name that specified ignores pattern")
 	flags.Usage = usage
 }
 
@@ -77,7 +79,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Quiet: quiet,
 			Stdout: stdout, Stderr: stderr, Regexp: regexp, Dryrun: dryrun},
 	)
-	f := finder.New(finder.FinderOption{Replacer: r, Pattern: filenamePattern, Stdout: stdout, Stderr: stderr})
+	f := finder.New(finder.FinderOption{Replacer: r, Pattern: filenamePattern, Stdout: stdout, Stderr: stderr, AppendedIgnoreFile: appendedIgnoreFile})
 
 	if err := f.Run(); err != nil {
 		return msg(err, stderr)

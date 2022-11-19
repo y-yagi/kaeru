@@ -3,6 +3,7 @@ package finder_test
 import (
 	"os"
 	"reflect"
+	"sort"
 	"sync"
 	"testing"
 
@@ -115,6 +116,8 @@ func TestFinder_appendedIgnoreFile(t *testing.T) {
 	}
 
 	expected := []string{"abc/dummy.log", "appended-ignore-file"}
+	sort.Strings(expected)
+	sort.Strings(r.Files)
 	if !reflect.DeepEqual(r.Files, expected) {
 		t.Fatalf("Exepectd %+v, but got %+v\n", expected, r.Files)
 	}

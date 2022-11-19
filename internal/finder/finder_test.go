@@ -54,8 +54,10 @@ func TestFinder_string(t *testing.T) {
 
 	r := &TestReplacer{}
 	f := finder.New(finder.FinderOption{Replacer: r, Pattern: "", Stdout: os.Stdout, Stderr: os.Stderr})
-	os.Chdir(tempdir)
-	f.Run()
+	_ = os.Chdir(tempdir)
+	if err := f.Run(); err != nil {
+		t.Fatalf("Unexpected error happened %+v\n", err)
+	}
 
 	if len(r.Files) != 1 {
 		t.Fatalf("Exepectd files are one, but got %+v\n", r.Files)
@@ -103,7 +105,7 @@ func TestFinder_appendedIgnoreFile(t *testing.T) {
 
 	r := &TestReplacer{}
 	f := finder.New(finder.FinderOption{Replacer: r, Pattern: "", Stdout: os.Stdout, Stderr: os.Stderr, AppendedIgnoreFile: ignorefile})
-	os.Chdir(tempdir)
+	_ = os.Chdir(tempdir)
 	if err = f.Run(); err != nil {
 		t.Fatalf("Run failed %+v\n", err)
 	}

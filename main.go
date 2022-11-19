@@ -56,7 +56,9 @@ func msg(err error, stderr io.Writer) int {
 }
 
 func run(args []string, stdout, stderr io.Writer) int {
-	flags.Parse(args[1:])
+	if err := flags.Parse(args[1:]); err != nil {
+		return msg(err, stderr)
+	}
 
 	if showVersion {
 		fmt.Fprintf(stdout, "%s %s\n", cmd, version)

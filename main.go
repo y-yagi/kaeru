@@ -77,6 +77,11 @@ func run(args []string, stdout, stderr io.Writer) int {
 		}
 	}
 
+	if flags.Arg(0) == flags.Arg(1) {
+		fmt.Fprintln(stderr, "don't use the same value for FROM and TO.")
+		return 1
+	}
+
 	r := replacer.New(
 		replacer.ReplacerOption{From: flags.Arg(0), To: flags.Arg(1), Quiet: quiet,
 			Stdout: stdout, Stderr: stderr, Regexp: regexp, Dryrun: dryrun},

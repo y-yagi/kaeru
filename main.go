@@ -36,7 +36,7 @@ func setFlags() {
 	flags.StringVar(&filenamePattern, "name", "", "file name pattern")
 	flags.BoolVar(&regexp, "regexp", false, "treat FROM as a regexp")
 	flags.BoolVar(&dryrun, "dry-run", false, "perform a trial run with no changes made")
-	flags.BoolVar(&quiet, "quiet", false, "supress output")
+	flags.BoolVar(&quiet, "quiet", false, "suppress output")
 	flags.StringVar(&appendedIgnoreFile, "ignore-file", "", "pass a file name that specified ignores pattern")
 	flags.Usage = usage
 }

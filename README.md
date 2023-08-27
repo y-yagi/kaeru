@@ -1,6 +1,6 @@
 # Kaeru
 
-Kaeru is a tool to replace text that matching a pattern.
+Kaeru is a tool to replace text that matches a pattern.
 
 ## Usage
 
@@ -21,3 +21,5 @@ OPTIONS:
     	treat FROM as a regexp
   -v	print version number
 ```
+
+Note: Kaeru ignores files that specify in `.gitignore`.

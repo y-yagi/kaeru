@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	ignore "github.com/sabhiram/go-gitignore"
@@ -97,10 +96,6 @@ func (f *Finder) Run() error {
 }
 
 func (f *Finder) isIgnorePath(path string) bool {
-	if path != "." && strings.HasPrefix(path, ".") {
-		return true
-	}
-
 	if _, found := ignoreDirectories[path]; found {
 		return true
 	}

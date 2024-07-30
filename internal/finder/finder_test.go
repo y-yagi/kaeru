@@ -15,8 +15,11 @@ type TestReplacer struct {
 }
 
 func (r *TestReplacer) Run(wg *sync.WaitGroup, path string) {
+	mu := &sync.Mutex{}
 	defer wg.Done()
+	mu.Lock()
 	r.Files = append(r.Files, path)
+	mu.Unlock()
 }
 
 func TestFinder_string(t *testing.T) {
@@ -60,13 +63,15 @@ func TestFinder_string(t *testing.T) {
 		t.Fatalf("Unexpected error happened %+v\n", err)
 	}
 
-	if len(r.Files) != 1 {
-		t.Fatalf("Exepectd files are one, but got %+v\n", r.Files)
+	if len(r.Files) != 2 {
+		t.Fatalf("Exepectd files are two, but got %+v\n", r.Files)
 	}
 
-	expected := "abc/dummy.log"
-	if r.Files[0] != expected {
-		t.Fatalf("Exepectd %+v, but got %+v\n", expected, r.Files[0])
+	expected := []string{"abc/dummy.log", ".gitignore"}
+	sort.Strings(expected)
+	sort.Strings(r.Files)
+	if !reflect.DeepEqual(r.Files, expected) {
+		t.Fatalf("Exepectd %+v, but got %+v\n", expected, r.Files)
 	}
 }
 
@@ -112,7 +117,7 @@ func TestFinder_appendedIgnoreFile(t *testing.T) {
 	}
 
 	if len(r.Files) != 2 {
-		t.Fatalf("Exepectd files are one, but got %+v\n", r.Files)
+		t.Fatalf("Exepectd files are two, but got %+v\n", r.Files)
 	}
 
 	expected := []string{"abc/dummy.log", "appended-ignore-file"}

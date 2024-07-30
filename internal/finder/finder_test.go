@@ -15,8 +15,11 @@ type TestReplacer struct {
 }
 
 func (r *TestReplacer) Run(wg *sync.WaitGroup, path string) {
+	mu := &sync.Mutex{}
 	defer wg.Done()
+	mu.Lock()
 	r.Files = append(r.Files, path)
+	mu.Unlock()
 }
 
 func TestFinder_string(t *testing.T) {

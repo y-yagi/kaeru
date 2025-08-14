@@ -60,14 +60,14 @@ func (r *FileReplacer) Run(wg *sync.WaitGroup, path string) {
 		t := scanner.Text()
 		if matcher.match(t) {
 			if !r.quiet {
-				fmt.Fprintf(r.stdout, "Replace %s:%d: %s\n", path, i, matcher.colorizeFrom(t))
+				fmt.Fprintf(r.stdout, "Replace %s:%d: %s\n", path, i, matcher.colorizeFrom(t)) //nolint:errcheck
 			}
 			needUpdate = true
 		}
 		data += t + "\n"
 	}
 
-	f.Close()
+	f.Close() //nolint:errcheck
 
 	if r.dryrun || !needUpdate {
 		return
@@ -77,11 +77,11 @@ func (r *FileReplacer) Run(wg *sync.WaitGroup, path string) {
 
 	info, err := os.Stat(path)
 	if err != nil {
-		fmt.Fprintf(r.stderr, "file stat failed: %v\n", err)
+		fmt.Fprintf(r.stderr, "file stat failed: %v\n", err) //nolint:errcheck
 	}
 
 	err = os.WriteFile(path, []byte(newData), info.Mode())
 	if err != nil {
-		fmt.Fprintf(r.stderr, "file update failed: %v\n", err)
+		fmt.Fprintf(r.stderr, "file update failed: %v\n", err) //nolint:errcheck
 	}
 }

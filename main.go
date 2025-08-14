@@ -49,7 +49,7 @@ func usage() {
 
 func msg(err error, stderr io.Writer) int {
 	if err != nil {
-		fmt.Fprintf(stderr, "%s: %v\n", cmd, err)
+		fmt.Fprintf(stderr, "%s: %v\n", cmd, err) //nolint:errcheck
 		return 1
 	}
 	return 0
@@ -61,7 +61,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	if showVersion {
-		fmt.Fprintf(stdout, "%s %s\n", cmd, version)
+		fmt.Fprintf(stdout, "%s %s\n", cmd, version) //nolint:errcheck
 		return 0
 	}
 
@@ -72,13 +72,13 @@ func run(args []string, stdout, stderr io.Writer) int {
 
 	if len(filenamePattern) != 0 {
 		if _, err := path.Match(filenamePattern, ""); err != nil {
-			fmt.Fprintf(stderr, "invalid file name pattern is specified: %v\n", err)
+			fmt.Fprintf(stderr, "invalid file name pattern is specified: %v\n", err) //nolint:errcheck
 			return 1
 		}
 	}
 
 	if flags.Arg(0) == flags.Arg(1) {
-		fmt.Fprintln(stderr, "don't use the same value for FROM and TO.")
+		fmt.Fprintln(stderr, "don't use the same value for FROM and TO.") //nolint:errcheck
 		return 1
 	}
 

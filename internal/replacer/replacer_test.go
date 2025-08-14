@@ -13,7 +13,7 @@ func TestReplacer_string(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer os.RemoveAll(tempDir) //nolint:errcheck
 
 	testfile := tempDir + "/dummy.log"
 	if err = os.WriteFile(testfile, []byte("Hello, wolrd"), 0644); err != nil {
@@ -41,7 +41,7 @@ func TestReplacer_regexp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer os.RemoveAll(tempDir) //nolint:errcheck
 
 	testfile := tempDir + "/dummy.log"
 	if err = os.WriteFile(testfile, []byte("Hello, world from 2022/01/31"), 0644); err != nil {

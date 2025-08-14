@@ -27,7 +27,7 @@ func TestFinder_string(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tempdir)
+	defer os.RemoveAll(tempdir) //nolint:errcheck
 
 	testdir := tempdir + "/abc"
 	if err = os.Mkdir(testdir, 0755); err != nil {
@@ -80,7 +80,7 @@ func TestFinder_appendedIgnoreFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tempdir)
+	defer os.RemoveAll(tempdir) //nolint:errcheck
 
 	testdir := tempdir + "/abc"
 	if err = os.Mkdir(testdir, 0755); err != nil {

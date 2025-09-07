@@ -48,6 +48,7 @@ func (r *FileReplacer) Run(wg *sync.WaitGroup, path string) {
 	scanner := bufio.NewScanner(f)
 	needUpdate := false
 	data := ""
+	hasTrailingNewline := false
 
 	var matcher Matcher
 	if r.regexp {
@@ -67,6 +68,19 @@ func (r *FileReplacer) Run(wg *sync.WaitGroup, path string) {
 		data += t + "\n"
 	}
 
+	// Check if the original file ends with a newline
+	stat, err := f.Stat()
+	if err == nil && stat.Size() > 0 {
+		buf := make([]byte, 1)
+		_, err := f.Seek(-1, io.SeekEnd)
+		if err == nil {
+			_, err := f.Read(buf)
+			if err == nil && buf[0] == '\n' {
+				hasTrailingNewline = true
+			}
+		}
+	}
+
 	f.Close() //nolint:errcheck
 
 	if r.dryrun || !needUpdate {
@@ -74,6 +88,16 @@ func (r *FileReplacer) Run(wg *sync.WaitGroup, path string) {
 	}
 
 	newData := matcher.replace(string(data))
+	// Preserve original trailing newline
+	if hasTrailingNewline {
+		if len(newData) == 0 || newData[len(newData)-1] != '\n' {
+			newData += "\n"
+		}
+	} else {
+		if len(newData) > 0 && newData[len(newData)-1] == '\n' {
+			newData = newData[:len(newData)-1]
+		}
+	}
 
 	info, err := os.Stat(path)
 	if err != nil {

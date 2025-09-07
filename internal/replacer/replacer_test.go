@@ -30,7 +30,7 @@ func TestReplacer_string(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := "Hello, world\n"
+	expected := "Hello, world"
 	if string(newtext) != expected {
 		t.Fatalf("Exepectd \n\n%s\nbut got\n\n%s\n", expected, newtext)
 	}
@@ -58,8 +58,65 @@ func TestReplacer_regexp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := "Hello, world from 01/31/2022\n"
+	expected := "Hello, world from 01/31/2022"
 	if string(newtext) != expected {
 		t.Fatalf("Exepectd \n\n%s\nbut got\n\n%s\n", expected, newtext)
+	}
+}
+func TestReplacer_preserve_trailing_newline(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "replacertest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir) //nolint:errcheck
+
+	testfile := tempDir + "/dummy.log"
+	// File ends with a newline
+	if err = os.WriteFile(testfile, []byte("foo\nbar\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	replacer := replacer.New(replacer.ReplacerOption{From: "bar", To: "baz", Stdout: os.Stdout, Stderr: os.Stderr, Quiet: true})
+	replacer.Run(&wg, testfile)
+
+	newtext, err := os.ReadFile(testfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := "foo\nbaz\n"
+	if string(newtext) != expected {
+		t.Fatalf("Expected trailing newline to be preserved.\nExpected: %q\nGot: %q", expected, newtext)
+	}
+}
+
+func TestReplacer_omit_trailing_newline(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "replacertest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir) //nolint:errcheck
+
+	testfile := tempDir + "/dummy.log"
+	// File does not end with a newline
+	if err = os.WriteFile(testfile, []byte("foo\nbar"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	replacer := replacer.New(replacer.ReplacerOption{From: "bar", To: "baz", Stdout: os.Stdout, Stderr: os.Stderr, Quiet: true})
+	replacer.Run(&wg, testfile)
+
+	newtext, err := os.ReadFile(testfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := "foo\nbaz"
+	if string(newtext) != expected {
+		t.Fatalf("Expected no trailing newline to be added.\nExpected: %q\nGot: %q", expected, newtext)
 	}
 }
